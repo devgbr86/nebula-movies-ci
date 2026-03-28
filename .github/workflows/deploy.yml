@@ -24,10 +24,10 @@ jobs:
         run: npm install
 
       - name: Build TypeScript
-        run: npx tsc
+        run: npx tsc --listEmittedFiles
 
       - name: Check dist
-        run: ls -la dist/
+        run: ls -la dist/core dist/pages
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
