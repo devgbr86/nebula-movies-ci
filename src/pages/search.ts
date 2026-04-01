@@ -1,5 +1,7 @@
-import { openModal, closeModal } from "../core/main.js";
-import type { OMDbDetail, OMDbSearchResponse } from "../core/main.js";
+import { openModal, closeModal } from "../core/modal.js";
+import type { OMDbDetail, OMDbSearchResponse } from "../core/types.js";
+
+// ─── Constants ────────────────────────────────────────────
 
 const API_KEY = "trilogy";
 const BASE    = "https://www.omdbapi.com/";
@@ -12,51 +14,38 @@ const GENRES = [
 ];
 
 const COUNTRIES: { label: string; match: string }[] = [
-  { label: "USA",         match: "United States" },
-  { label: "UK",          match: "United Kingdom" },
-  { label: "Japan",       match: "Japan"          },
-  { label: "France",      match: "France"         },
-  { label: "Germany",     match: "Germany"        },
-  { label: "Italy",       match: "Italy"          },
-  { label: "Soviet Union", match: "Soviet Union"  },
-  { label: "Australia",   match: "Australia"      },
-  { label: "Canada",      match: "Canada"         },
-  { label: "Spain",       match: "Spain"          },
-  { label: "South Korea",  match: "South Korea"   },
-  { label: "China",       match: "China"          },
-  { label: "India",       match: "India"          },
-  { label: "Brazil",      match: "Brazil"         },
-  { label: "Mexico",      match: "Mexico"         },
-  { label: "Argentina",   match: "Argentina"      },
-  { label: "Sweden",      match: "Sweden"         },
-  { label: "Denmark",     match: "Denmark"        },
-  { label: "Poland",      match: "Poland"         },
+  { label: "USA",          match: "United States" },
+  { label: "UK",           match: "United Kingdom" },
+  { label: "Japan",        match: "Japan"          },
+  { label: "France",       match: "France"         },
+  { label: "Germany",      match: "Germany"        },
+  { label: "Italy",        match: "Italy"          },
+  { label: "Soviet Union", match: "Soviet Union"   },
+  { label: "Australia",    match: "Australia"      },
+  { label: "Canada",       match: "Canada"         },
+  { label: "Spain",        match: "Spain"          },
+  { label: "South Korea",  match: "South Korea"    },
+  { label: "China",        match: "China"          },
+  { label: "India",        match: "India"          },
+  { label: "Brazil",       match: "Brazil"         },
+  { label: "Mexico",       match: "Mexico"         },
+  { label: "Argentina",    match: "Argentina"      },
+  { label: "Sweden",       match: "Sweden"         },
+  { label: "Denmark",      match: "Denmark"        },
+  { label: "Poland",       match: "Poland"         },
 ];
 
+// ─── State ────────────────────────────────────────────────
+
 let currentSelectedLi: HTMLLIElement | null = null;
+
+// ─── Helpers ──────────────────────────────────────────────
 
 function setStatus(msg: string, isError: boolean): void {
   const el = document.getElementById("status-msg") as HTMLDivElement | null;
   if (!el) return;
   el.textContent = msg;
   el.className   = isError ? "error" : "";
-}
-
-function renderMovieLi(movie: OMDbDetail, listEl: HTMLUListElement): void {
-  const li     = document.createElement("li");
-  const rating = movie.imdbRating && movie.imdbRating !== "N/A"
-    ? ` &middot; &#9733; ${movie.imdbRating}` : "";
-  li.innerHTML = `
-    <div class="movie-title">${movie.Title}</div>
-    <div class="movie-meta">${movie.Year} &middot; ${movie.Runtime}${rating}</div>
-  `;
-  li.addEventListener("click", () => {
-    currentSelectedLi?.classList.remove("active");
-    li.classList.add("active");
-    currentSelectedLi = li;
-    openModal(movie);
-  });
-  listEl.appendChild(li);
 }
 
 function buildUrl(title: string, type: string, page: number, y: number | null): string {
@@ -69,6 +58,8 @@ function buildUrl(title: string, type: string, page: number, y: number | null): 
   if (y)    params.set("y",    String(y));
   return `${BASE}?${params.toString()}`;
 }
+
+// ─── Data fetching ────────────────────────────────────────
 
 async function fetchIds(
   title:     string,
@@ -119,6 +110,8 @@ async function fetchIds(
   return ids;
 }
 
+// ─── Filtering ────────────────────────────────────────────
+
 function matchesFilters(
   movie:      OMDbDetail,
   genreVal:   string,
@@ -142,6 +135,30 @@ function matchesFilters(
 
   return true;
 }
+
+// ─── Rendering ────────────────────────────────────────────
+
+function renderMovieLi(movie: OMDbDetail, listEl: HTMLUListElement): void {
+  const li     = document.createElement("li");
+  const rating = movie.imdbRating && movie.imdbRating !== "N/A"
+    ? ` &middot; &#9733; ${movie.imdbRating}` : "";
+
+  li.innerHTML = `
+    <div class="movie-title">${movie.Title}</div>
+    <div class="movie-meta">${movie.Year} &middot; ${movie.Runtime}${rating}</div>
+  `;
+
+  li.addEventListener("click", () => {
+    currentSelectedLi?.classList.remove("active");
+    li.classList.add("active");
+    currentSelectedLi = li;
+    openModal(movie);
+  });
+
+  listEl.appendChild(li);
+}
+
+// ─── Search orchestration ─────────────────────────────────
 
 async function searchMovies(
   title:      string,
@@ -199,10 +216,12 @@ async function searchMovies(
   }
 }
 
+// ─── Page render ──────────────────────────────────────────
+
 export function renderSearch(app: HTMLElement): void {
   currentSelectedLi = null;
 
-  const genreOptions = `<option value="">All genres</option>` +
+  const genreOptions   = `<option value="">All genres</option>` +
     GENRES.map(g => `<option value="${g}">${g}</option>`).join("");
 
   const countryOptions = `<option value="">All countries</option>` +
@@ -286,7 +305,7 @@ export function renderSearch(app: HTMLElement): void {
     const countryQ = countryEl.value;
 
     if (!titleQ) {
-      const statusEl = document.getElementById("status-msg") as HTMLDivElement;
+      const statusEl     = document.getElementById("status-msg") as HTMLDivElement;
       statusEl.textContent = "Enter a title to search.";
       statusEl.className   = "error";
       return;
