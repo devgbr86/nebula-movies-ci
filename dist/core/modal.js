@@ -1,7 +1,10 @@
-import { initRouter, register } from "./router.js";
-import { renderHome } from "../pages/home.js";
-import { renderSearch } from "../pages/search.js";
-import { buildDetailHTML } from "../pages/detail.js";
+import { buildDetailHTML } from "../ui/detail.js";
+// ─── Internal ─────────────────────────────────────────────
+function onEscKey(e) {
+    if (e.key === "Escape")
+        closeModal();
+}
+// ─── Public API ───────────────────────────────────────────
 export function openModal(movie) {
     let overlay = document.getElementById("movie-modal-overlay");
     if (!overlay) {
@@ -26,11 +29,3 @@ export function closeModal() {
     overlay.classList.remove("open");
     document.removeEventListener("keydown", onEscKey);
 }
-function onEscKey(e) {
-    if (e.key === "Escape")
-        closeModal();
-}
-const app = document.getElementById("app");
-register("/", () => renderHome(app));
-register("/search", () => renderSearch(app));
-initRouter();

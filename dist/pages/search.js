@@ -1,4 +1,5 @@
-import { openModal, closeModal } from "../core/main.js";
+import { openModal, closeModal } from "../core/modal.js";
+// ─── Constants ────────────────────────────────────────────
 const API_KEY = "trilogy";
 const BASE = "https://www.omdbapi.com/";
 const GENRES = [
@@ -28,29 +29,15 @@ const COUNTRIES = [
     { label: "Denmark", match: "Denmark" },
     { label: "Poland", match: "Poland" },
 ];
+// ─── State ────────────────────────────────────────────────
 let currentSelectedLi = null;
+// ─── Helpers ──────────────────────────────────────────────
 function setStatus(msg, isError) {
     const el = document.getElementById("status-msg");
     if (!el)
         return;
     el.textContent = msg;
     el.className = isError ? "error" : "";
-}
-function renderMovieLi(movie, listEl) {
-    const li = document.createElement("li");
-    const rating = movie.imdbRating && movie.imdbRating !== "N/A"
-        ? ` &middot; &#9733; ${movie.imdbRating}` : "";
-    li.innerHTML = `
-    <div class="movie-title">${movie.Title}</div>
-    <div class="movie-meta">${movie.Year} &middot; ${movie.Runtime}${rating}</div>
-  `;
-    li.addEventListener("click", () => {
-        currentSelectedLi?.classList.remove("active");
-        li.classList.add("active");
-        currentSelectedLi = li;
-        openModal(movie);
-    });
-    listEl.appendChild(li);
 }
 function buildUrl(title, type, page, y) {
     const params = new URLSearchParams({
@@ -64,6 +51,7 @@ function buildUrl(title, type, page, y) {
         params.set("y", String(y));
     return `${BASE}?${params.toString()}`;
 }
+// ─── Data fetching ────────────────────────────────────────
 async function fetchIds(title, type, startYear, endYear) {
     const yearList = [];
     if (startYear && endYear) {
@@ -105,6 +93,7 @@ async function fetchIds(title, type, startYear, endYear) {
     }));
     return ids;
 }
+// ─── Filtering ────────────────────────────────────────────
 function matchesFilters(movie, genreVal, countryVal, startYear, endYear) {
     if (movie.Response !== "True")
         return false;
@@ -122,6 +111,24 @@ function matchesFilters(movie, genreVal, countryVal, startYear, endYear) {
     }
     return true;
 }
+// ─── Rendering ────────────────────────────────────────────
+function renderMovieLi(movie, listEl) {
+    const li = document.createElement("li");
+    const rating = movie.imdbRating && movie.imdbRating !== "N/A"
+        ? ` &middot; &#9733; ${movie.imdbRating}` : "";
+    li.innerHTML = `
+    <div class="movie-title">${movie.Title}</div>
+    <div class="movie-meta">${movie.Year} &middot; ${movie.Runtime}${rating}</div>
+  `;
+    li.addEventListener("click", () => {
+        currentSelectedLi?.classList.remove("active");
+        li.classList.add("active");
+        currentSelectedLi = li;
+        openModal(movie);
+    });
+    listEl.appendChild(li);
+}
+// ─── Search orchestration ─────────────────────────────────
 async function searchMovies(title, type, genreVal, countryVal) {
     const decadeFilter = document.getElementById("decade-filter");
     const resultsEl = document.getElementById("results");
@@ -159,6 +166,7 @@ async function searchMovies(title, type, genreVal, countryVal) {
         setStatus("Connection error.", true);
     }
 }
+// ─── Page render ──────────────────────────────────────────
 export function renderSearch(app) {
     currentSelectedLi = null;
     const genreOptions = `<option value="">All genres</option>` +

@@ -2,10 +2,12 @@
 export function field(label, value) {
     if (!value || value === "N/A")
         return "";
-    return `<div class="detail-block">
-    <span class="detail-label">${label}</span>
-    <p class="detail-value">${value}</p>
-  </div>`;
+    return `
+    <div class="detail-block">
+      <span class="detail-label">${label}</span>
+      <p class="detail-value">${value}</p>
+    </div>
+  `;
 }
 // ─── Build modal HTML ─────────────────────────────────────
 export function buildDetailHTML(movie) {
@@ -13,7 +15,8 @@ export function buildDetailHTML(movie) {
     <div class="rating-chip">
       <span class="rating-source">${r.Source.replace("Internet Movie Database", "IMDb")}</span>
       <span class="rating-value">${r.Value}</span>
-    </div>`).join("") ?? "";
+    </div>
+  `).join("") ?? "";
     const poster = movie.Poster && movie.Poster !== "N/A"
         ? `<div class="movie-modal-poster"><img src="${movie.Poster}" alt="${movie.Title} poster"></div>`
         : `<div class="movie-modal-poster"><div class="movie-modal-poster-placeholder">No poster</div></div>`;
@@ -35,10 +38,12 @@ export function buildDetailHTML(movie) {
           ${field("Genre", movie.Genre)}
           ${movie.Awards && movie.Awards !== "N/A" ? field("Awards", movie.Awards) : ""}
           ${movie.BoxOffice && movie.BoxOffice !== "N/A" ? field("Box Office", movie.BoxOffice) : ""}
-          ${ratings ? `<div class="detail-block">
-            <span class="detail-label">Ratings</span>
-            <div class="movie-modal-ratings">${ratings}</div>
-          </div>` : ""}
+          ${ratings ? `
+            <div class="detail-block">
+              <span class="detail-label">Ratings</span>
+              <div class="movie-modal-ratings">${ratings}</div>
+            </div>
+          ` : ""}
         </div>
       </div>
     </div>

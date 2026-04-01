@@ -1,10 +1,13 @@
 // ─── Types ────────────────────────────────────────────────
+
 type RouteHandler = () => void;
 
 // ─── State ────────────────────────────────────────────────
+
 const routes: Record<string, RouteHandler> = {};
 
 // ─── Public API ───────────────────────────────────────────
+
 export function register(path: string, handler: RouteHandler): void {
   routes[path] = handler;
 }
@@ -14,6 +17,7 @@ export function navigate(path: string): void {
 }
 
 // ─── Internal ─────────────────────────────────────────────
+
 function resolve(): void {
   const hash    = location.hash.replace("#", "") || "/";
   const clean   = hash.length > 1 ? hash.replace(/\/$/, "") : hash;
